@@ -1,0 +1,230 @@
+import { gql } from 'graphql-tag';
+
+export const typeDefs = gql`
+  scalar Date
+  scalar JSON
+
+  # User type - fleksibel med metadata
+  type User {
+    id: ID!
+    email: String!
+    name: String
+    createdAt: Date!
+    updatedAt: Date!
+    metadata: UserMetadata!
+  }
+
+  # Fleksibelt metadata objekt
+  type UserMetadata {
+    avatar: String
+    age: Int
+    gender: String
+    height: Float
+    weight: Float
+    onboardingCompleted: Boolean
+    level: Int
+    totalScore: Int
+    preferences: UserPreferences
+  }
+
+  type UserPreferences {
+    mainGoal: String
+    focusAreas: [String!]
+    dailyTime: String
+  }
+
+  # Auth response
+  type AuthPayload {
+    token: String!
+    user: User!
+  }
+
+  # Activity - hovedentitet for all aktivitet
+  type Activity {
+    id: ID!
+    userId: ID!
+    categoryId: String!
+    name: String!
+    duration: Int # minutes
+    points: Int!
+    completedAt: Date!
+    createdAt: Date!
+    data: JSON # Fleksibelt felt for ekstra data
+  }
+
+  # User progress per kategori
+  type UserProgress {
+    id: ID!
+    userId: ID!
+    categoryId: String!
+    totalPoints: Int!
+    level: Int!
+    updatedAt: Date!
+    stats: ProgressStats!
+  }
+
+  type ProgressStats {
+    streakDays: Int
+    bestStreak: Int
+    totalActivities: Int
+    totalDuration: Int
+    weeklyGoal: Int
+    monthlyProgress: Float
+    achievements: [String!]
+  }
+
+  # Category info
+  type Category {
+    id: String!
+    name: String!
+    icon: String!
+    color: String!
+    description: String!
+  }
+
+  # Overall progress
+  type OverallProgress {
+    totalScore: Int!
+    overallLevel: Int!
+    categories: [CategoryProgress!]!
+    recentActivities: [Activity!]!
+    achievements: [Achievement!]!
+  }
+
+  type CategoryProgress {
+    categoryId: String!
+    categoryName: String!
+    categoryIcon: String!
+    totalPoints: Int!
+    level: Int!
+    levelProgress: Int!
+    pointsToNextLevel: Int!
+    stats: ProgressStats!
+  }
+
+  type Achievement {
+    id: String!
+    name: String!
+    description: String!
+    icon: String!
+    unlockedAt: Date
+  }
+
+  # Activity stats
+  type ActivityStats {
+    totalActivities: Int!
+    totalPoints: Int!
+    totalDuration: Int!
+    averagePoints: Int!
+    streakDays: Int!
+  }
+
+  # Leaderboard entry
+  type LeaderboardEntry {
+    user: User!
+    score: Int!
+    rank: Int!
+  }
+
+  # Input types
+  input RegisterInput {
+    email: String!
+    password: String!
+    name: String
+  }
+
+  input LoginInput {
+    email: String!
+    password: String!
+  }
+
+  input SaveActivityInput {
+    categoryId: String!
+    name: String!
+    duration: Int
+    points: Int!
+    completedAt: Date
+    data: JSON
+  }
+
+  input UpdateActivityInput {
+    categoryId: String
+    name: String
+    duration: Int
+    points: Int
+    completedAt: Date
+    data: JSON
+  }
+
+  input UpdateProfileInput {
+    name: String
+    avatar: String
+    age: Int
+    gender: String
+    height: Float
+    weight: Float
+    preferences: UserPreferencesInput
+  }
+
+  input UserPreferencesInput {
+    mainGoal: String
+    focusAreas: [String!]
+    dailyTime: String
+  }
+
+  # Queries
+  type Query {
+    # Auth & User
+    me: User
+    
+    # Categories
+    categories: [Category!]!
+    
+    # Activities
+    myActivities(
+      categoryId: String
+      limit: Int
+      offset: Int
+      startDate: Date
+      endDate: Date
+    ): ActivityList!
+    
+    activity(id: ID!): Activity
+    
+    # Progress
+    myProgress: OverallProgress!
+    categoryProgress(categoryId: String!): CategoryProgress
+    
+    # Stats
+    activityStats(categoryId: String): ActivityStats!
+    
+    # Leaderboard
+    leaderboard(
+      categoryId: String
+      timeFrame: String
+      limit: Int
+    ): [LeaderboardEntry!]!
+  }
+
+  type ActivityList {
+    activities: [Activity!]!
+    total: Int!
+  }
+
+  # Mutations
+  type Mutation {
+    # Auth
+    register(input: RegisterInput!): AuthPayload!
+    login(input: LoginInput!): AuthPayload!
+    
+    # Profile
+    updateProfile(input: UpdateProfileInput!): User!
+    changePassword(oldPassword: String!, newPassword: String!): Boolean!
+    deleteAccount(password: String!): Boolean!
+    
+    # Activities
+    saveActivity(input: SaveActivityInput!): Activity!
+    updateActivity(id: ID!, input: UpdateActivityInput!): Activity!
+    deleteActivity(id: ID!): Boolean!
+  }
+`;

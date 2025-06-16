@@ -1,0 +1,110 @@
+import { AuthService } from '../services/authService';
+import { verifyTokenAndGetUser } from '../middleware/auth';
+
+const authService = new AuthService();
+
+export const authResolvers = {
+  Query: {
+    me: async (_: any, __: any, context: any) => {
+      if (!context.user) {
+        throw new Error('Not authenticated');
+      }
+      
+      return await authService.getProfile(context.user.id);
+    },
+  },
+  
+  Mutation: {
+    register: async (_: any, { input }: any) => {
+      try {
+        const result = await authService.register(input);
+        return result;
+      } catch (error: any) {
+        throw new Error(error.message || 'Registration failed');
+      }
+    },
+    
+    login: async (_: any, { input }: any) => {
+      try {
+        const result = await authService.login(input);
+        return result;
+      } catch (error: any) {
+        throw new Error(error.message || 'Login failed');
+      }
+    },
+    
+    updateProfile: async (_: any, { input }: any, context: any) => {
+      if (!context.user) {
+        throw new Error('Not authenticated');
+      }
+      
+      try {
+        const updatedUser = await authService.updateProfile(context.user.id, input);
+        return updatedUser;
+      } catch (error: any) {
+        throw new Error(error.message || 'Update failed');
+      }
+    },
+    
+    changePassword: async (_: any, { oldPassword, newPassword }: any, context: any) => {
+      if (!context.user) {
+        throw new Error('Not authenticated');
+      }
+      
+      try {
+        const result = await authService.changePassword(
+          context.user.id,
+          oldPassword,
+          newPassword
+        );
+        return result;
+      } catch (error: any) {
+        throw new Error(error.message || 'Password change failed');
+      }
+    },
+    
+    deleteAccount: async (_: any, { password }: any, context: any) => {
+      if (!context.user) {
+        throw new Error('Not authenticated');
+      }
+      
+      try {
+        const result = await authService.deleteAccount(context.user.id, password);
+        return result;
+      } catch (error: any) {
+        throw new Error(error.message || 'Account deletion failed');
+      }
+    },
+  },
+  
+  // Resolve nested fields
+  User: {
+    metadata: (parent: any) => {
+      return parent.metadata || {};
+    },
+  },
+  
+  UserMetadata: {
+    avatar: (parent: any) => parent.avatar || null,
+    age: (parent: any) => parent.age || null,
+    gender: (parent: any) => parent.gender || null,
+    height: (parent: any) => parent.height || null,
+    weight: (parent: any) => parent.weight || null,
+    onboardingCompleted: (parent: any) => parent.onboardingCompleted || false,
+    level: (parent: any) => parent.level || 1,
+    totalScore: (parent: any) => parent.totalScore || 0,
+    preferences: (parent: any) => parent.preferences || null,
+  },
+};
+
+// Helper to create GraphQL context
+export const createContext = async ({ req }: any) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  
+  if (!token) {
+    return { user: null };
+  }
+  
+  const user = await verifyTokenAndGetUser(token);
+  return { user };
+};

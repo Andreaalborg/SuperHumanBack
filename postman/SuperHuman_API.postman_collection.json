@@ -1,0 +1,255 @@
+{
+  "info": {
+    "name": "SuperHuman API",
+    "description": "GraphQL API for SuperHuman app",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation Register($input: RegisterInput!) {\n  register(input: $input) {\n    token\n    user {\n      id\n      email\n      name\n      metadata {\n        level\n        totalScore\n      }\n    }\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\",\n    \"name\": \"Test User\"\n  }\n}"
+              }
+            },
+            "url": "{{baseUrl}}/graphql"
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.data && response.data.login && response.data.login.token) {",
+                  "    pm.collectionVariables.set(\"authToken\", response.data.login.token);",
+                  "    console.log(\"Token saved to collection variables\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation Login($input: LoginInput!) {\n  login(input: $input) {\n    token\n    user {\n      id\n      email\n      name\n    }\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n  }\n}"
+              }
+            },
+            "url": "{{baseUrl}}/graphql"
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query Me {\n  me {\n    id\n    email\n    name\n    createdAt\n    metadata {\n      avatar\n      age\n      level\n      totalScore\n      onboardingCompleted\n    }\n  }\n}"
+              }
+            },
+            "url": "{{baseUrl}}/graphql"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Activities",
+      "item": [
+        {
+          "name": "Save Activity",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation SaveActivity($input: SaveActivityInput!) {\n  saveActivity(input: $input) {\n    id\n    name\n    categoryId\n    points\n    duration\n    completedAt\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"categoryId\": \"physical\",\n    \"name\": \"Morning Run\",\n    \"duration\": 30,\n    \"points\": 20,\n    \"data\": {\n      \"distance\": 5,\n      \"calories\": 250\n    }\n  }\n}"
+              }
+            },
+            "url": "{{baseUrl}}/graphql"
+          }
+        },
+        {
+          "name": "Get My Activities",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query MyActivities($categoryId: String, $limit: Int, $offset: Int) {\n  myActivities(categoryId: $categoryId, limit: $limit, offset: $offset) {\n    activities {\n      id\n      name\n      categoryId\n      points\n      duration\n      completedAt\n      data\n    }\n    total\n  }\n}",
+                "variables": "{\n  \"limit\": 10,\n  \"offset\": 0\n}"
+              }
+            },
+            "url": "{{baseUrl}}/graphql"
+          }
+        },
+        {
+          "name": "Get Activity Stats",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query ActivityStats($categoryId: String) {\n  activityStats(categoryId: $categoryId) {\n    totalActivities\n    totalPoints\n    totalDuration\n    averagePoints\n    streakDays\n  }\n}"
+              }
+            },
+            "url": "{{baseUrl}}/graphql"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Progress",
+      "item": [
+        {
+          "name": "Get My Progress",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query MyProgress {\n  myProgress {\n    totalScore\n    overallLevel\n    categories {\n      categoryId\n      categoryName\n      categoryIcon\n      totalPoints\n      level\n      levelProgress\n      pointsToNextLevel\n      stats {\n        streakDays\n        bestStreak\n        totalActivities\n        totalDuration\n      }\n    }\n    recentActivities {\n      id\n      name\n      points\n      completedAt\n    }\n    achievements {\n      id\n      name\n      description\n      icon\n      unlockedAt\n    }\n  }\n}"
+              }
+            },
+            "url": "{{baseUrl}}/graphql"
+          }
+        },
+        {
+          "name": "Get Categories",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query Categories {\n  categories {\n    id\n    name\n    icon\n    color\n    description\n  }\n}"
+              }
+            },
+            "url": "{{baseUrl}}/graphql"
+          }
+        },
+        {
+          "name": "Get Leaderboard",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query Leaderboard($categoryId: String, $limit: Int) {\n  leaderboard(categoryId: $categoryId, limit: $limit) {\n    rank\n    score\n    user {\n      id\n      name\n      metadata {\n        avatar\n        level\n      }\n    }\n  }\n}",
+                "variables": "{\n  \"limit\": 10\n}"
+              }
+            },
+            "url": "{{baseUrl}}/graphql"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/health"
+      }
+    }
+  ]
+}

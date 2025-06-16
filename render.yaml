@@ -1,0 +1,45 @@
+services:
+  - type: web
+    name: superhuman-backend
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: FRONTEND_URL
+        value: https://superhuman-app.com # Update when you have domain
+      - key: DB_HOST
+        fromDatabase:
+          name: superhuman-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: superhuman-db
+          property: port
+      - key: DB_USER
+        fromDatabase:
+          name: superhuman-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: superhuman-db
+          property: password
+      - key: DB_NAME
+        fromDatabase:
+          name: superhuman-db
+          property: database
+      - key: OPENAI_API_KEY
+        sync: false # Add manually in Render dashboard
+
+databases:
+  - name: superhuman-db
+    databaseName: superhuman_db
+    user: superhuman_user
+    plan: free # PostgreSQL free tier

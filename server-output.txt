@@ -1,0 +1,37 @@
+🔧 Loading environment variables...
+✅ Environment loaded
+Error connecting to database: Error: connect ECONNREFUSED 127.0.0.1:5432
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1300:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5432
+}
+⚠️  Database connection failed: connect ECONNREFUSED 127.0.0.1:5432
+⚠️  Starting server without database...
+⚠️  GraphQL queries that need database will fail
+✅ Apollo Server started
+
+🚀 SuperHuman Backend Server Ready!
+===================================
+🌐 Server:   http://0.0.0.0:4000
+📊 GraphQL:  http://0.0.0.0:4000/graphql
+💚 Health:   http://0.0.0.0:4000/health
+🌍 Frontend: http://localhost:8081
+⚙️  Mode:     development
+📱 Phone:    http://172.24.8.72:4000/graphql
+===================================
+
+⚠️  DATABASE STATUS: Check console above
+===================================
+      
+🤖 AI Service Status: ✅ OpenAI Connected
+📤 Sending to OpenAI: Hei, jeg vil bli sterkere og løpe lengre. kan du l...
+✅ OpenAI responded successfully
+📤 Sending to OpenAI: Kan du lage en mer detaljert plan med spesifikke ø...
+✅ OpenAI responded successfully
+📤 Sending to OpenAI: Hei, jeg vil bli sterkere og trene 2 ganger i uka....
+✅ OpenAI responded successfully
+📤 Sending to OpenAI: Hvor mange kalorier bør jeg spise...
+✅ OpenAI responded successfully

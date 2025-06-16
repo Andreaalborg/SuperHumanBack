@@ -1,0 +1,16 @@
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
+export const authConfig = {
+  jwtSecret: 'superhuman-secret-key-change-in-production',
+  jwtExpiresIn: '7d',
+  bcryptRounds: 10,
+};
+
+export const generateTokenPayload = (user: { id: string; email: string }) => {
+  return {
+    userId: user.id,
+    email: user.email,
+  };
+};

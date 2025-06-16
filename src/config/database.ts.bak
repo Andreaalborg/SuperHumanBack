@@ -1,0 +1,51 @@
+import { DataSource } from 'typeorm';
+import * as dotenv from 'dotenv';
+import { User } from '../entities/User';
+import { Activity } from '../entities/Activity';
+import { UserProgress } from '../entities/UserProgress';
+
+// Load environment variables
+dotenv.config();
+
+export const AppDataSource = new DataSource({
+  type: 'postgres',
+  host: process.env.DB_HOST || 'localhost',
+  port: parseInt(process.env.DB_PORT || '5432'),
+  username: process.env.DB_USER || 'postgres',
+  password: process.env.DB_PASSWORD || 'postgres',
+  database: process.env.DB_NAME || 'superhuman_db',
+  synchronize: process.env.NODE_ENV === 'development', // Auto-create tables in dev
+  logging: process.env.NODE_ENV === 'development',
+  entities: [User, Activity, UserProgress],
+  migrations: ['src/migrations/*.ts'],
+  subscribers: ['src/subscribers/*.ts'],
+});
+
+export const connectDatabase = async () => {
+  try {
+    await AppDataSource.initialize();
+    console.log('✅ Database connection established');
+    
+    // Log some helpful info in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`📊 Connected to database: ${process.env.DB_NAME}`);
+      console.log(`🏠 Host: ${process.env.DB_HOST}:${process.env.DB_PORT}`);
+    }
+  } catch (error) {
+    console.error('❌ Error connecting to database:', error);
+    console.error('💡 Sjekk at PostgreSQL kjører og at credentials i .env er riktige');
+    throw error;
+  }
+};
+
+export const disconnectDatabase = async () => {
+  try {
+    if (AppDataSource.isInitialized) {
+      await AppDataSource.destroy();
+      console.log('Database connection closed');
+    }
+  } catch (error) {
+    console.error('Error closing database connection:', error);
+    throw error;
+  }
+};
