@@ -64,7 +64,7 @@ app.get('/', (req, res) => {
 });
 
 // Global variable for mock mode
-const isMockMode = process.env.MOCK_MODE === 'true' || (process.env.NODE_ENV === 'development' && !process.env.DB_HOST);
+const isMockMode = process.env.MOCK_MODE === 'true' || !process.env.DB_HOST;
 
 async function startServer() {
   try {
